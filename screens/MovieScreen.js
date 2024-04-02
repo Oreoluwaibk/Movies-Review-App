@@ -6,6 +6,8 @@ import { HeartIcon } from 'react-native-heroicons/solid';
 import { styles, theme } from '../theme';
 import { LinearGradient } from "expo-linear-gradient";
 import Cast from '../components/cast';
+import MovieList from '../components/movieList';
+import Loading from '../components/loading';
 
 
 
@@ -17,7 +19,9 @@ export default function MovieScreen() {
     const { params: item } = useRoute();
     const natigation = useNavigation();
     const [ isFavourite, setIsFavourite ] = useState(false);
-    const [ cast, setCast ] = useState([1,2,3,4,5])
+    const [ cast, setCast ] = useState([1,2,3,4,5]);
+    const [ similarMovies, setSimilarMovies ] = useState([1,2,3,4,5]);
+    const [ loading, setLoading ] = useState(false);
 
     const movieName = "Ant-man and the wasp: Quantimania";
     useEffect(() => {
@@ -33,7 +37,7 @@ export default function MovieScreen() {
         {/* back button and movie poster */}
         <View className="w-full relative">
             <SafeAreaView 
-                className={"absolute top-12 z-20 w-full flex-row items-center justify-between px-6 "+ topMargin}
+                className={"absolute top-12 z-20 w-full flex-row items-center justify-between px-5 "+ topMargin}
             >
                 <TouchableOpacity className="rounded-xl p-1" style={styles.background} onPress={() => natigation.goBack()} >
                     <ChevronLeftIcon size="28" strokeWidth={2.5} color="white"/>
@@ -43,22 +47,27 @@ export default function MovieScreen() {
                     <HeartIcon size="35" color={isFavourite ? theme.background : "white"} />
                 </TouchableOpacity>
             </SafeAreaView>
-            <View>
-                <Image 
-                    source={require("../assets/Mobile-login.jpg")}
-                    style={{
-                        width: width,
-                        height: height * 0.55
-                    }}
-                />
-                <LinearGradient 
-                    colors={["transparent", "rgba(23,23,23,0.8)", "rgba(23,23,23,1)"]}
-                    style={{width: width, height: height*0.40}}
-                    start={{x: 0.5, y:0}}
-                    end={{x:0.5, y:1}}
-                    className="absolute bottom-0"
-                />
-            </View>
+            
+            {
+                loading ? <Loading />:
+                <View>
+                    <Image 
+                        source={require("../assets/Mobile-login.jpg")}
+                        style={{
+                            width: width,
+                            height: height * 0.55
+                        }}
+                    />
+                    <LinearGradient 
+                        colors={["transparent", "rgba(23,23,23,0.8)", "rgba(23,23,23,1)"]}
+                        style={{width: width, height: height*0.40}}
+                        start={{x: 0.5, y:0}}
+                        end={{x:0.5, y:1}}
+                        className="absolute bottom-0"
+                    />
+                </View>
+                
+            }
         </View>
 
         {/* movie details view */}
@@ -90,6 +99,9 @@ export default function MovieScreen() {
         </View>
        
        <Cast cast={cast} navigation={natigation}/>
+
+       {/* similar movies */}
+       <MovieList title="Similar movies" data={similarMovies} hideSeeAll={true} />
     </ScrollView>
   )
 }
