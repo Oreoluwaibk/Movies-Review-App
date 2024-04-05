@@ -2,13 +2,15 @@ import { View, Text, Dimensions, TouchableOpacity, ScrollView, TouchableWithoutF
 import React from 'react'
 import { styles } from '../theme'
 import { useNavigation } from '@react-navigation/native';
+import { image185 } from '../api/moivedb';
 
 
 var { width, height } = Dimensions.get("window");
 
 export default function MovieList({ title, data, hideSeeAll }) {
-    const movieName = "Ant-man and the wasp: Quantimania";
     const navigation = useNavigation();
+
+    // console.log("data go", data);
   return (
     <View className="mb-8 space-y-4">
         <View className="mx-4 flex-row justify-between items-center">
@@ -27,7 +29,7 @@ export default function MovieList({ title, data, hideSeeAll }) {
             contentContainerStyle={{paddingHorizontal: 15}}
         >
             {
-                data.map((item, index) => {
+                data.length > 0 && data.map((item, index) => {
                     return (
                         <TouchableWithoutFeedback
                             key={index}
@@ -35,7 +37,8 @@ export default function MovieList({ title, data, hideSeeAll }) {
                         >
                             <View className="space-y-1 mr-4">
                                 <Image 
-                                    source={require("../assets/hang.jpg")}
+                                    // source={require("../assets/hang.jpg")}
+                                    source={{uri: image185(item.poster_path)}}
                                     className="rounded-3xl"
                                     width={width*0.33}
                                     style={{
@@ -44,7 +47,7 @@ export default function MovieList({ title, data, hideSeeAll }) {
                                     }}
                                 />
                                 <Text className="text-neutral-300 ml-1">
-                                    {movieName.length > 14 ? movieName.slice(0,14)+"...": movieName}
+                                    {item.title.length > 14 ? item.title.slice(0,14)+"...": item.title}
                                 </Text>
                             </View>
                         </TouchableWithoutFeedback>

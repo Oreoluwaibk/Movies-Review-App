@@ -1,5 +1,5 @@
 import { View, Text, StatusBar, Platform, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native';
 import { StatusBar as BarStatus } from "expo-status-bar";
 import { Bars3CenterLeftIcon, MagnifyingGlassIcon } from "react-native-heroicons/outline"
@@ -8,15 +8,43 @@ import TrendingMovies from '../components/trendingMovies';
 import MovieList from '../components/movieList';
 import { useNavigation } from '@react-navigation/native';
 import Loading from '../components/loading';
+import { getTrendingMovie, getTopRatedMovies, getUpcomingMovies } from '../api/moivedb';
+
 
 const ios = Platform.OS == "ios";
 const andriod = Platform.OS = "android";
 export default function HomePage() {
     const navigation = useNavigation();
-    const [ trendingMovies, setTrendingMovies ] = useState([1,2,3]);
-    const [ upcomingMovies, setUpcomingMovies ] = useState([1,2,3]);
-    const [ topRatedMovies, setTopRatedMovies ] = useState([1,2,3]);
+    const [ trendingMovies, setTrendingMovies ] = useState([]);
+    const [ upcomingMovies, setUpcomingMovies ] = useState([]);
+    const [ topRatedMovies, setTopRatedMovies ] = useState([]);
     const [ loading, setLoading ] = useState(false);
+
+    useEffect(() => {
+        const payload = [
+            getTopRatedMovies(),
+            getTrendingMovie(),
+            getUpcomingMovies()
+        ]
+
+        setLoading(true);
+        // getTopRatedMovies()
+        Promise.all(payload)
+        .then(([top, trending, upcoming]) => {
+            // console.log("data", upcoming.results);
+            console.log("ata", top.results);
+            setTopRatedMovies(top.results);
+            setTrendingMovies(trending.results);
+            setUpcomingMovies(upcoming.results);
+            setLoading(false);
+        })
+        .catch((err) => {
+            console.log("err",err);
+            setLoading(false);
+        })
+
+    }, [])
+
   return (
 
     <View className="flex-1 bg-neutral-800 pt-14">
@@ -42,12 +70,12 @@ export default function HomePage() {
                 contentContainerStyle={{paddingBottom: 10}}
             >
                 {/* Trending Movies carousel */}
-                <TrendingMovies data={trendingMovies} />
+                {trendingMovies.length > 0 && <TrendingMovies data={trendingMovies} />}
                 {/* upcoming Movies carousel */}
-                <MovieList title="Upcoming" data={upcomingMovies} />
+                {upcomingMovies.length > 0 && <MovieList title="Upcoming" data={upcomingMovies} />}
 
                 {/* top rated Movies carousel */}
-                <MovieList title="Top Rated" data={topRatedMovies} />
+                {topRatedMovies.length > 0 && <MovieList title="Top Rated" data={topRatedMovies} />}
             </ScrollView>
         }
     </View>

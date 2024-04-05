@@ -2,6 +2,7 @@ import { View, Text, Dimensions, Image, TouchableWithoutFeedback } from 'react-n
 import React from 'react'
 import Carousel from 'react-native-snap-carousel'
 import { useNavigation } from '@react-navigation/native';
+import { image500 } from '../api/moivedb';
 
 
 var { width, height } = Dimensions.get("window");
@@ -35,7 +36,8 @@ const MovieCard = ({ item, handleClick }) => {
             <View>
                 {/* <Text className="text-white">Movie</Text> */}
                 <Image 
-                    source={require("../assets/hanging.jpg")}
+                    // source={require("../assets/hanging.jpg")}
+                    source={{uri: image500(item.poster_path)}}
                     style={{
                         width: width * 0.6,
                         height: height * 0.4

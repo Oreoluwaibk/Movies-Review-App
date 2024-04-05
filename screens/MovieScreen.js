@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Cast from '../components/cast';
 import MovieList from '../components/movieList';
 import Loading from '../components/loading';
+import { getMovieCredits, getMovieDetails, getTrendingMovie, image500 } from '../api/moivedb';
 
 
 
@@ -18,14 +19,38 @@ const topMargin = ios ? "" : "mt-3";
 export default function MovieScreen() {
     const { params: item } = useRoute();
     const natigation = useNavigation();
+    const [ movieDetails, setMovieDetails ] = useState(null);
+    const [ movieCredits, setMovieCredits ] = useState(null);
     const [ isFavourite, setIsFavourite ] = useState(false);
-    const [ cast, setCast ] = useState([1,2,3,4,5]);
-    const [ similarMovies, setSimilarMovies ] = useState([1,2,3,4,5]);
+    const [ cast, setCast ] = useState([]);
+    const [ similarMovies, setSimilarMovies ] = useState([]);
     const [ loading, setLoading ] = useState(false);
 
-    const movieName = "Ant-man and the wasp: Quantimania";
     useEffect(() => {
+        const payload = [
+            getMovieDetails(item.id),
+            getMovieCredits(item.id)
+        ]
+        setLoading(true);
 
+        Promise.all(payload)
+        .then(([details, credits]) => {
+            setMovieDetails(details);  
+            setMovieCredits(credits);
+            setCast(credits.cast);
+            setLoading(false);
+        })
+        // getMovieDetails(item.id)
+        // .then((res) => {
+        //     console.log("allres", res.genres.length);
+        //     setLoading(false);
+        //     setMovieDetails(res)
+        // })
+        .catch((err) => {
+            console.log("err", err);
+            setLoading(false);
+        })
+        // setMovieDetails(item);
     }, [item]);
 
 
@@ -52,7 +77,8 @@ export default function MovieScreen() {
                 loading ? <Loading />:
                 <View>
                     <Image 
-                        source={require("../assets/Mobile-login.jpg")}
+                        // source={require("../assets/Mobile-login.jpg")}
+                        source={{uri: movieDetails && image500(movieDetails.poster_path)}}
                         style={{
                             width: width,
                             height: height * 0.55
@@ -71,37 +97,38 @@ export default function MovieScreen() {
         </View>
 
         {/* movie details view */}
-        <View style={{marginTop: -(height*0.09)}} className="space-y-3">
-            <Text className="text-white text-center text-3xl font-bold tracking-wider">
-                {movieName}
-            </Text>
-
-            {/*  */}
-            <Text className="text-neutral-400 font-semibold text-base text-center">
-                Released . 2020 . 170min
-            </Text>
-
-            <View className="flex-row justify-center mx-4 space-x-2">
-                <Text className="text-neutral-400 font-semibold text-center text-base">
-                    Action .
+        {loading ? <Loading /> :<>
+            <View style={{marginTop: -(height*0.09)}} className="space-y-3">
+                <Text className="text-white text-center text-3xl font-bold tracking-wider">
+                    {movieDetails && movieDetails.title}
                 </Text>
-                <Text className="text-neutral-400 font-semibold text-center text-base">
-                    Thrill .
+
+                {/*  */}
+                <Text className="text-neutral-400 font-semibold text-base text-center">
+                    {movieDetails && movieDetails.status} . {movieDetails && movieDetails.release_date} . {movieDetails && movieDetails.runtime}min
                 </Text>
-                <Text className="text-neutral-400 font-semibold text-center text-base">
-                    Comedy
+
+                <View className="flex-row justify-center mx-4 space-x-2">
+                    {movieDetails && movieDetails.genres.length > 0 &&movieDetails.genres.map((gen) => {
+                        return(
+                            <Text className="text-neutral-400 font-semibold text-center text-base" key={gen.id}>
+                            {gen.name} .
+                        </Text>
+                        )
+                    })}
+                </View>
+
+                <Text className="text-neutral-400 mx-4 tracking-wide">
+                {movieDetails && movieDetails.overview}
                 </Text>
             </View>
-
-            <Text className="text-neutral-400 mx-4 tracking-wide">
-            Ex-UFC fighter Dalton takes a job as a bouncer at a Florida Keys roadhouse, only to discover that this paradise is not all it seems. Ex-UFC fighter Dalton takes a job as a bouncer at a Florida Keys roadhouse, only to discover that this paradise is not all it seems.
-            </Text>
-        </View>
-       
-       <Cast cast={cast} navigation={natigation}/>
+        
+            <Cast cast={cast} navigation={natigation}/>
 
        {/* similar movies */}
-       <MovieList title="Similar movies" data={similarMovies} hideSeeAll={true} />
+            {similarMovies.length > 0 && <MovieList title="Similar movies" data={similarMovies} hideSeeAll={true} />}
+        </>}
+        
     </ScrollView>
   )
 }
