@@ -10,19 +10,42 @@ import {
     TextInput,
     TouchableWithoutFeedback
 } from 'react-native'
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { XMarkIcon } from 'react-native-heroicons/outline';
 import Loading from '../components/loading';
+import { getMovieSearch, image500 } from '../api/moivedb';
+import { debounce } from 'lodash';
 
 var { width, height } = Dimensions.get("window");
 const ios = Platform.OS == "ios";
 
 export default function SearchScreen() {
     const navigation = useNavigation();
-    const [ results, setResults ] = useState([1,2,3,4]);
+    const [ results, setResults ] = useState([]);
     const movieName = "Ant-man and the wasp: Quantimania";
     const [ loading, setLoading ] = useState(false);
+
+    const handleOnChangeText = (value) => {
+        if(value && value.length > 2){
+            setLoading(true);
+            getMovieSearch(value)
+            .then((res) => {
+                setResults(res.results)
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.log("err", "unable to get movie");
+                setLoading(false);
+            })
+        }else{
+            setLoading(false);
+            setResults([]);
+        }
+        
+    }
+
+    const handleTextDebounce = useCallback(debounce(handleOnChangeText, 400), [])
 
   return (
     <SafeAreaView
@@ -33,6 +56,7 @@ export default function SearchScreen() {
                 placeholder="Search Movie"
                 placeholderTextColor={"lightgray"}
                 className="pb-1 pl-6 flex-1 text-base font-semibold text-white tracking-wider"
+                onChangeText={handleTextDebounce}
             />
 
             <TouchableOpacity
@@ -62,7 +86,7 @@ export default function SearchScreen() {
                                     >
                                         <View className="space-y-2 mb-4">
                                             <Image 
-                                                source={require("../assets/Mobilelogin.jpg")}
+                                                source={{uri: image500(item.poster_path)}}
                                                 style={{
                                                     width: width*0.44,
                                                     height: height*0.3
@@ -70,7 +94,7 @@ export default function SearchScreen() {
                                                 className="rounded-3xl"
                                             />
                                             <Text className="text-neutral-300 nl-1">
-                                                {movieName.length > 22 ? movieName.slice(0,22)+"...": movieName}
+                                                {item.title.length > 22 ? item.title.slice(0,22)+"...": item.title}
                                             </Text>
                                         </View>
                                     </TouchableWithoutFeedback>

@@ -7,7 +7,7 @@ import { theme } from '../theme';
 var { width, height } = Dimensions.get("window");
 export default function Loading() {
   return (
-    <View style={{width, height}} className="absolute flex-row justify-center items-center">
+    <View style={{width, height: height}} className="absolute flex-row justify-center items-center bg-neutral-900 flex-1">
       <Progress.CircleSnail
         thickness={12}
         size={160}

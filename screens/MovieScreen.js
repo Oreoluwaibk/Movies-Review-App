@@ -8,7 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Cast from '../components/cast';
 import MovieList from '../components/movieList';
 import Loading from '../components/loading';
-import { getMovieCredits, getMovieDetails, getTrendingMovie, image500 } from '../api/moivedb';
+import { getMovieCredits, getMovieDetails, getSimilarMovies, getTrendingMovie, image500 } from '../api/moivedb';
 
 
 
@@ -20,7 +20,6 @@ export default function MovieScreen() {
     const { params: item } = useRoute();
     const natigation = useNavigation();
     const [ movieDetails, setMovieDetails ] = useState(null);
-    const [ movieCredits, setMovieCredits ] = useState(null);
     const [ isFavourite, setIsFavourite ] = useState(false);
     const [ cast, setCast ] = useState([]);
     const [ similarMovies, setSimilarMovies ] = useState([]);
@@ -29,23 +28,18 @@ export default function MovieScreen() {
     useEffect(() => {
         const payload = [
             getMovieDetails(item.id),
-            getMovieCredits(item.id)
+            getMovieCredits(item.id),
+            getSimilarMovies(item.id)
         ]
         setLoading(true);
 
         Promise.all(payload)
-        .then(([details, credits]) => {
+        .then(([details, credits, similar]) => {
             setMovieDetails(details);  
-            setMovieCredits(credits);
             setCast(credits.cast);
+            setSimilarMovies(similar.results)
             setLoading(false);
         })
-        // getMovieDetails(item.id)
-        // .then((res) => {
-        //     console.log("allres", res.genres.length);
-        //     setLoading(false);
-        //     setMovieDetails(res)
-        // })
         .catch((err) => {
             console.log("err", err);
             setLoading(false);
@@ -55,7 +49,7 @@ export default function MovieScreen() {
 
 
   return (
-    <ScrollView
+    loading ? <Loading /> : <ScrollView
         contentContainerStyle={{paddingBottom: 20}}
         className="flex-1 bg-neutral-900" 
     >
@@ -73,61 +67,56 @@ export default function MovieScreen() {
                 </TouchableOpacity>
             </SafeAreaView>
             
-            {
-                loading ? <Loading />:
-                <View>
-                    <Image 
-                        // source={require("../assets/Mobile-login.jpg")}
-                        source={{uri: movieDetails && image500(movieDetails.poster_path)}}
-                        style={{
-                            width: width,
-                            height: height * 0.55
-                        }}
-                    />
-                    <LinearGradient 
-                        colors={["transparent", "rgba(23,23,23,0.8)", "rgba(23,23,23,1)"]}
-                        style={{width: width, height: height*0.40}}
-                        start={{x: 0.5, y:0}}
-                        end={{x:0.5, y:1}}
-                        className="absolute bottom-0"
-                    />
-                </View>
-                
-            }
+            
+            <View className="flex-1">
+                <Image 
+                    // source={require("../assets/Mobile-login.jpg")}
+                    source={{uri: movieDetails && image500(movieDetails.poster_path)}}
+                    style={{
+                        width: width,
+                        height: height * 0.55
+                    }}
+                />
+                <LinearGradient 
+                    colors={["transparent", "rgba(23,23,23,0.8)", "rgba(23,23,23,1)"]}
+                    style={{width: width, height: height*0.40}}
+                    start={{x: 0.5, y:0}}
+                    end={{x:0.5, y:1}}
+                    className="absolute bottom-0"
+                />
+            </View>
         </View>
 
         {/* movie details view */}
-        {loading ? <Loading /> :<>
-            <View style={{marginTop: -(height*0.09)}} className="space-y-3">
-                <Text className="text-white text-center text-3xl font-bold tracking-wider">
-                    {movieDetails && movieDetails.title}
-                </Text>
+        <View style={{marginTop: -(height*0.09)}} className="space-y-3">
+            <Text className="text-white text-center text-3xl font-bold tracking-wider">
+                {movieDetails && movieDetails.title}
+            </Text>
 
-                {/*  */}
-                <Text className="text-neutral-400 font-semibold text-base text-center">
-                    {movieDetails && movieDetails.status} . {movieDetails && movieDetails.release_date} . {movieDetails && movieDetails.runtime}min
-                </Text>
+            {/*  */}
+            <Text className="text-neutral-400 font-semibold text-base text-center">
+                {movieDetails && movieDetails.status} . {movieDetails && movieDetails.release_date} . {movieDetails && movieDetails.runtime}min
+            </Text>
 
-                <View className="flex-row justify-center mx-4 space-x-2">
-                    {movieDetails && movieDetails.genres.length > 0 &&movieDetails.genres.map((gen) => {
-                        return(
-                            <Text className="text-neutral-400 font-semibold text-center text-base" key={gen.id}>
-                            {gen.name} .
-                        </Text>
-                        )
-                    })}
-                </View>
-
-                <Text className="text-neutral-400 mx-4 tracking-wide">
-                {movieDetails && movieDetails.overview}
-                </Text>
+            <View className="flex-row justify-center mx-4 space-x-2">
+                {movieDetails && movieDetails.genres.length > 0 &&movieDetails.genres.map((gen, index) => {
+                    return(
+                        <Text className="text-neutral-400 font-semibold text-center text-base" key={gen.id}>
+                        {gen.name}{movieDetails.genres.length === index+1 ? "" : "."}
+                    </Text>
+                    )
+                })}
             </View>
-        
-            <Cast cast={cast} navigation={natigation}/>
+
+            <Text className="text-neutral-400 mx-4 tracking-wide">
+            {movieDetails && movieDetails.overview}
+            </Text>
+        </View>
+    
+        <Cast cast={cast} navigation={natigation}/>
 
        {/* similar movies */}
-            {similarMovies.length > 0 && <MovieList title="Similar movies" data={similarMovies} hideSeeAll={true} />}
-        </>}
+        {similarMovies.length > 0 && <MovieList title="Similar movies" data={similarMovies} hideSeeAll={true} />}
         
     </ScrollView>
   )

@@ -67,3 +67,51 @@ export const getMovieCredits = async (movie_id) => {
 
     return Promise.resolve(response.data);
 }
+
+export const getSimilarMovies = async (movie_id) => {
+    const url = `${process.env.MOVIEENDPOINT}/movie/${movie_id}/similar`;
+
+    const response = await axios.get(url, {
+        headers: {
+            Authorization: `Bearer ${process.env.MOVIEWDBAPIREADTOKEN}`
+        }
+    })
+
+    return Promise.resolve(response.data);
+}
+
+export const getMovieSearch = async (movieName) => {
+    const url = `${process.env.MOVIEENDPOINT}/search/movie?query=${movieName}`;
+
+    const response = await axios.get(url, {
+        headers: {
+            Authorization: `Bearer ${process.env.MOVIEWDBAPIREADTOKEN}`
+        }
+    })
+
+    return Promise.resolve(response.data);
+}
+
+export const getPerson = async (person_id) => {
+    const url = `${process.env.MOVIEENDPOINT}/person/${person_id}`;
+
+    const response = await axios.get(url, {
+        headers: {
+            Authorization: `Bearer ${process.env.MOVIEWDBAPIREADTOKEN}`
+        }
+    })
+
+    return Promise.resolve(response.data);
+}
+
+export const getPersonMovieCredits = async (person_id) => {
+    const url = `${process.env.MOVIEENDPOINT}/person/${person_id}/credits`;
+
+    const response = await axios.get(url, {
+        headers: {
+            Authorization: `Bearer ${process.env.MOVIEWDBAPIREADTOKEN}`
+        }
+    })
+
+    return Promise.resolve(response.data);
+}

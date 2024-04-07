@@ -31,8 +31,6 @@ export default function HomePage() {
         // getTopRatedMovies()
         Promise.all(payload)
         .then(([top, trending, upcoming]) => {
-            // console.log("data", upcoming.results);
-            console.log("ata", top.results);
             setTopRatedMovies(top.results);
             setTrendingMovies(trending.results);
             setUpcomingMovies(upcoming.results);
